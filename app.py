@@ -5,20 +5,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+import chromedriver_autoinstaller
 import schedule
 import time
 from datetime import datetime
-import os
-import subprocess
-
-def install_chrome():
-    # Instala Google Chrome
-    if not os.path.exists("/usr/bin/google-chrome"):
-        subprocess.run(["wget", "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"])
-        subprocess.run(["apt-get", "install", "./google-chrome-stable_current_amd64.deb", "-y"])
-
-install_chrome()
 
 def click_button_on_website(url, status_placeholder):
     # Configuración del navegador
@@ -26,10 +16,12 @@ def click_button_on_website(url, status_placeholder):
     chrome_options.add_argument("--headless")  # Ejecutar en modo headless
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--remote-debugging-port=9222")
 
-    # Usa webdriver_manager para obtener el chromedriver
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    # Instala automáticamente chromedriver
+    chromedriver_autoinstaller.install()
+
+    driver = webdriver.Chrome(options=chrome_options)
 
     try:
         # Abre la página
