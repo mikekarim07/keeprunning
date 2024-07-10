@@ -124,7 +124,10 @@ def download_chromedriver():
     with open(temp_file.name, 'wb') as file:
         file.write(response.content)
     
-    st.write("Chromedriver downloaded successfully.")
+    # Cambiar permisos del archivo para hacerlo ejecutable
+    os.chmod(temp_file.name, 0o755)
+    
+    st.write("Chromedriver downloaded and permissions set successfully.")
     return temp_file.name
 
 def click_button_on_website(url, status_placeholder, driver_path):
