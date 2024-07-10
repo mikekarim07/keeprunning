@@ -3,3 +3,4 @@ selenium
 schedule
 webdriver-manager
 chromedriver-autoinstaller
+undetected-chromedriver
