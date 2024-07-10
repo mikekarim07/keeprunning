@@ -22,7 +22,7 @@ def click_button_on_website(url, status_placeholder):
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    service = Service('/chromedriver.exe')  # Reemplaza 'path/to/chromedriver' con la ruta a tu chromedriver
+    service = Service('https://github.com/mikekarim07/keeprunning/blob/main/chromedriver.exe')  # Reemplaza 'path/to/chromedriver' con la ruta a tu chromedriver
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
