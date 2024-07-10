@@ -2,3 +2,4 @@ streamlit
 selenium
 schedule
 webdriver-manager
+chromedriver-autoinstaller
