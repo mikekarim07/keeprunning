@@ -5,42 +5,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import schedule
 import time
 from datetime import datetime
-import threading
-import logging
-import chromedriver_autoinstaller
-
-
-def create_driver():
-    # Instala automáticamente el ChromeDriver adecuado
-    chromedriver_autoinstaller.install()
-
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--remote-debugging-port=9222")
-    chrome_options.add_argument('--disable-software-rasterizer')
-    chrome_options.add_argument('--disable-logging')
-    chrome_options.add_argument('--log-level=3')
-    chrome_options.add_argument('--silent')
-    chrome_options.add_argument('--disable-translate')
-    chrome_options.add_argument('--disable-background-timer-throttling')
-    chrome_options.add_argument('--disable-renderer-backgrounding')
-    chrome_options.add_argument('--disable-backgrounding-occluded-windows')
-    chrome_options.add_argument('--disable-infobars')
-
-    driver = webdriver.Chrome(options=chrome_options)
-    return driver
-
-# Configuración de logging
-logging.basicConfig(filename='web_automation.log', level=logging.INFO, 
-                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 def click_button_on_website(url, status_placeholder):
     # Configuración del navegador
@@ -49,7 +17,8 @@ def click_button_on_website(url, status_placeholder):
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    service = Service('https://github.com/mikekarim07/keeprunning/blob/main/chromedriver.exe')  # Reemplaza 'path/to/chromedriver' con la ruta a tu chromedriver
+    # Usa webdriver_manager para obtener el chromedriver
+    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
@@ -65,29 +34,26 @@ def click_button_on_website(url, status_placeholder):
         # Clickea el botón
         button.click()
 
-        # Espera 3 segundos
+        # Espera 5 minutos
         time.sleep(3)
 
         # Mensaje de éxito
         st.success(f"Successfully processed {url}")
-        logging.info(f"Successfully processed {url}")
 
     except Exception as e:
         st.error(f"An error occurred on {url}: {e}")
-        logging.error(f"An error occurred on {url}: {e}")
     finally:
         # Cierra el navegador
         driver.quit()
 
 def run_scheduled_tasks():
     st.write(f"Running scheduled tasks at {datetime.now()}")
-    logging.info(f"Running scheduled tasks at {datetime.now()}")
-    
     urls = [
         # "https://newlistings-bot.streamlit.app/",
         "https://tax-package-model.streamlit.app/",
         "https://saldosfinancieros.streamlit.app/",
         "https://impuestos-mabe.streamlit.app/",
+        
     ]
     
     status_placeholder = st.empty()
@@ -98,7 +64,6 @@ def run_scheduled_tasks():
         progress_bar.progress((i + 1) / len(urls))
 
     status_placeholder.write("All tasks completed.")
-    logging.info("All tasks completed.")
     progress_bar.empty()
 
 # Programa el script para que se ejecute todos los días a las 7:00 am
@@ -110,10 +75,6 @@ st.write("This app runs scheduled tasks to automate web interactions.")
 if st.button('Run Now'):
     run_scheduled_tasks()
 
-def run_schedule():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-# Ejecutar el planificador en un hilo separado para no bloquear el hilo principal de Streamlit
-threading.Thread(target=run_schedule).start()
+while True:
+    schedule.run_pending()
+    time.sleep(1)
