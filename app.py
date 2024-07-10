@@ -92,7 +92,6 @@
 # threading.Thread(target=run_schedule).start()
 
 
-
 import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -107,6 +106,7 @@ import threading
 import logging
 import os
 import requests
+import tempfile
 
 # Configuración de logging
 logging.basicConfig(filename='web_automation.log', level=logging.INFO, 
@@ -114,31 +114,26 @@ logging.basicConfig(filename='web_automation.log', level=logging.INFO,
 
 def download_chromedriver():
     url = 'https://github.com/mikekarim07/keeprunning/raw/main/chromedriver.exe'
-    local_path = 'chromedriver.exe'
+    
+    # Crear un archivo temporal
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.close()  # Cerrarlo para que requests pueda escribir en él
 
-    if not os.path.exists(local_path):
-        st.write(f"Downloading chromedriver from {url}")
-        response = requests.get(url)
-        with open(local_path, 'wb') as file:
-            file.write(response.content)
-        st.write("Chromedriver downloaded successfully.")
-    else:
-        st.write("Chromedriver already exists locally.")
+    st.write(f"Downloading chromedriver from {url}")
+    response = requests.get(url)
+    with open(temp_file.name, 'wb') as file:
+        file.write(response.content)
+    
+    st.write("Chromedriver downloaded successfully.")
+    return temp_file.name
 
-def click_button_on_website(url, status_placeholder):
+def click_button_on_website(url, status_placeholder, driver_path):
     # Configuración del navegador
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Ejecutar en modo headless
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    driver_path = 'chromedriver.exe'
-    
-    if not os.path.exists(driver_path):
-        st.error(f"Chromedriver not found at {driver_path}")
-        logging.error(f"Chromedriver not found at {driver_path}")
-        return
-    
     service = Service(driver_path)
     
     try:
@@ -170,7 +165,7 @@ def click_button_on_website(url, status_placeholder):
         if 'driver' in locals():
             driver.quit()
 
-def run_scheduled_tasks():
+def run_scheduled_tasks(driver_path):
     st.write(f"Running scheduled tasks at {datetime.now()}")
     logging.info(f"Running scheduled tasks at {datetime.now()}")
     
@@ -185,7 +180,7 @@ def run_scheduled_tasks():
     progress_bar = st.progress(0)
 
     for i, url in enumerate(urls):
-        click_button_on_website(url, status_placeholder)
+        click_button_on_website(url, status_placeholder, driver_path)
         progress_bar.progress((i + 1) / len(urls))
 
     status_placeholder.write("All tasks completed.")
@@ -193,16 +188,16 @@ def run_scheduled_tasks():
     progress_bar.empty()
 
 # Descargar chromedriver antes de programar tareas
-download_chromedriver()
+driver_path = download_chromedriver()
 
 # Programa el script para que se ejecute todos los días a las 7:00 am
-schedule.every().day.at("07:00").do(run_scheduled_tasks)
+schedule.every().day.at("07:00").do(run_scheduled_tasks, driver_path)
 
 st.title("Scheduled Web Automation")
 st.write("This app runs scheduled tasks to automate web interactions.")
 
 if st.button('Run Now'):
-    run_scheduled_tasks()
+    run_scheduled_tasks(driver_path)
 
 def run_schedule():
     while True:
