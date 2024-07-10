@@ -9,6 +9,16 @@ from webdriver_manager.chrome import ChromeDriverManager
 import schedule
 import time
 from datetime import datetime
+import os
+import subprocess
+
+def install_chrome():
+    # Instala Google Chrome
+    if not os.path.exists("/usr/bin/google-chrome"):
+        subprocess.run(["wget", "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"])
+        subprocess.run(["apt-get", "install", "./google-chrome-stable_current_amd64.deb", "-y"])
+
+install_chrome()
 
 def click_button_on_website(url, status_placeholder):
     # Configuración del navegador
@@ -49,11 +59,9 @@ def click_button_on_website(url, status_placeholder):
 def run_scheduled_tasks():
     st.write(f"Running scheduled tasks at {datetime.now()}")
     urls = [
-        # "https://newlistings-bot.streamlit.app/",
         "https://tax-package-model.streamlit.app/",
         "https://saldosfinancieros.streamlit.app/",
         "https://impuestos-mabe.streamlit.app/",
-        
     ]
     
     status_placeholder = st.empty()
